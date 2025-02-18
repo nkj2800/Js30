@@ -1,20 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>HTML5 Canvas</title>
   <link rel="icon" href="https://fav.farm/🔥" />
 </head>
-<body>
-<canvas id="draw" width="800" height="800"></canvas>
-<script>
-</script>
 
-<style>
-  html, body {
-    margin: 0;
-  }
-</style>
+<body>
+  <canvas id="draw" width="800" height="800"></canvas>
+  <script>
+
+    const canvas = document.querySelector('#draw'); // Select the canvas element
+    const cxt = canvas.getContext('2d'); // Get the 2D rendering context
+
+    // Set canvas dimensions to fill the entire window
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Set initial drawing styles
+    cxt.strokeStyle = '#bada55'; // Default stroke color
+    cxt.lineJoin = 'round'; // Round shape for line joins
+    cxt.lineCap = 'round'; // Round shape for line ends
+    // cxt.globalCompositeOperation = 'overlay'; // Uncomment for blending effects
+
+    // Variables to track drawing state
+    let isDrawing = false; // Whether the user is currently drawing
+    let lastX = 0; // Last X coordinate of the drawing cursor
+    let lastY = 0; // Last Y coordinate of the drawing cursor
+    let hue = 0; // Hue value for the HSL color
+    let direction = true; // Controls whether the line width increases or decreases
+
+    // Function to handle drawing
+    function draw(e) {
+      if (!isDrawing) return; // Stop the function if the user is not drawing
+
+      let x, y;
+
+      // Handle touch events
+      if (e.type === 'touchmove') {
+        x = e.changedTouches[0].clientX - canvas.offsetLeft; // Get touch X coordinate
+        y = e.changedTouches[0].clientY - canvas.offsetTop; // Get touch Y coordinate
+      }
+      // Handle mouse events
+      else {
+        x = e.offsetX; // Get mouse X coordinate
+        y = e.offsetY; // Get mouse Y coordinate
+      }
+
+      // Set stroke color using HSL for a rainbow effect
+      cxt.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+
+      // Begin a new path and draw a line from the last coordinates to the new ones
+      cxt.beginPath();
+      cxt.moveTo(lastX, lastY);
+      cxt.lineTo(x, y);
+      cxt.stroke();
+
+      // Update last coordinates to the current position
+      lastX = x;
+      lastY = y;
+
+      // Increment hue for color change and reset after 360
+      hue++;
+      if (hue >= 360) hue = 0;
+
+      // Toggle line width direction if it exceeds 50 or goes below 1
+      if (cxt.lineWidth >= 50 || cxt.lineWidth <= 1) direction = !direction;
+
+      // Increase or decrease line width based on direction
+      direction ? cxt.lineWidth++ : cxt.lineWidth--;
+    }
+
+    // Mouse Event Listeners
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true; // Start drawing
+      lastX = e.offsetX; // Set initial X coordinate
+      lastY = e.offsetY; // Set initial Y coordinate
+    });
+    canvas.addEventListener('mousemove', draw); // Draw while mouse is moving
+    canvas.addEventListener('mouseup', () => (isDrawing = false)); // Stop drawing on mouse up
+    canvas.addEventListener('mouseout', () => (isDrawing = false)); // Stop drawing if mouse leaves canvas
+
+    // Touch Event Listeners
+    canvas.addEventListener('touchstart', (e) => {
+      isDrawing = true; // Start drawing
+      const touch = e.changedTouches[0]; // Get the first touch point
+      lastX = touch.clientX - canvas.offsetLeft; // Set initial X coordinate
+      lastY = touch.clientY - canvas.offsetTop; // Set initial Y coordinate
+    });
+    canvas.addEventListener('touchmove', draw); // Draw while touch is moving
+    canvas.addEventListener('touchend', () => (isDrawing = false)); // Stop drawing on touch end
+    canvas.addEventListener('touchcancel', () => (isDrawing = false)); // Stop drawing if touch is canceled
+
+  </script>
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+  </style>
 
 </body>
+
 </html>
